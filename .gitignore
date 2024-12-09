@@ -1,0 +1,20 @@
+# Ignorar o arquivo .env
+.env
+
+# Ignorar binários gerados pelo Go
+/bin/
+/*.exe
+/*.out
+/*.test
+
+# Ignorar dependências baixadas em uma pasta "vendor" (se você não estiver usando Go Modules)
+vendor/
+
+# Ignorar cache do Go
+*.log
+*.tmp
+.DS_Store
+
+# Configurações de IDE/editor
+.vscode/
+.idea/
