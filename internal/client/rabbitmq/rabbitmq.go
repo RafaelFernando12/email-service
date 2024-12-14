@@ -1,22 +1,26 @@
 package rabbitmq
 
-"github.com/streadway/amqp"
+import (
+	"fmt"
+	"log"
+
+	"github.com/streadway/amqp"
+)
 
 type RabbitMQClient interface {
 	Connect() (*amqp.Connection, error)
+	Consume(queueName string) (<-chan amqp.Delivery, error)
 }
 
 type rabbitMQClient struct {
-	url      string
 	server   string
 	port     string
 	user     string
 	password string
 }
 
-func NewRabbitMQClient(url, server, port, user, password string) *rabbitMQClient {
+func NewRabbitMQClient(server, port, user, password string) *rabbitMQClient {
 	return &rabbitMQClient{
-		url:      url,
 		server:   server,
 		port:     port,
 		user:     user,
@@ -25,14 +29,7 @@ func NewRabbitMQClient(url, server, port, user, password string) *rabbitMQClient
 }
 
 func (c *rabbitMQClient) Connect() (*amqp.Connection, error) {
-	var connectionURL string
-
-	if c.url != "" {
-		connectionURL = c.url
-	} else {
-		connectionURL = fmt.Sprintf("amqp://%s:%s@%s:%s/", c.user, c.password, c.server, c.port)
-	}
-
+	connectionURL := fmt.Sprintf("amqp://%s:%s@%s:%s/", c.user, c.password, c.server, c.port)
 	conn, err := amqp.Dial(connectionURL)
 	if err != nil {
 		log.Printf("Erro ao conectar ao RabbitMQ: %v", err)
@@ -41,4 +38,47 @@ func (c *rabbitMQClient) Connect() (*amqp.Connection, error) {
 
 	log.Println("Conexão com RabbitMQ estabelecida com sucesso")
 	return conn, nil
+}
+
+func (c *rabbitMQClient) Consume(queueName string) (<-chan amqp.Delivery, error) {
+	conn, err := c.Connect()
+	if err != nil {
+		return nil, err
+	}
+
+	channel, err := conn.Channel()
+	if err != nil {
+		log.Printf("Erro ao criar canal RabbitMQ: %v", err)
+		return nil, err
+	}
+
+	_, err = channel.QueueDeclare(
+		queueName,
+		true,
+		false,
+		false,
+		false,
+		nil,
+	)
+	if err != nil {
+		log.Printf("Erro ao declarar fila: %v", err)
+		return nil, err
+	}
+
+	messages, err := channel.Consume(
+		queueName,
+		"",
+		true,
+		false,
+		false,
+		false,
+		nil,
+	)
+	if err != nil {
+		log.Printf("Erro ao iniciar consumo: %v", err)
+		return nil, err
+	}
+
+	log.Printf("Consumindo mensagens da fila '%s'", queueName)
+	return messages, nil
 }
