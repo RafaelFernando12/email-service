@@ -10,10 +10,16 @@ const (
 	EnvLoggerLevel = "LOGGER_LEVEL"
 	DefaultPort    = "8082"
 
-	EnvRabbitmqServer   = "RABBITMQ_SERVER"
-	EnvRabbitmqPort     = "RABBITMQ_PORT"
-	EnvRabbitmqUser     = "RABBITMQ_USER"
-	EnvRabbitmqPassword = "RABBITMQ_PASSWORD"
+	EnvSmtpHost     = "SMTP_SERVER"
+	EnvSmtpPort     = "SMTP_PORT"
+	EnvSmtpUser     = "SMTP_USER"
+	EnvSmtpPassword = "SMTP_PASSWORD"
+
+	EnvRabbitmqServer    = "RABBITMQ_SERVER"
+	EnvRabbitmqPort      = "RABBITMQ_PORT"
+	EnvRabbitmqUser      = "RABBITMQ_USER"
+	EnvRabbitmqPassword  = "RABBITMQ_PASSWORD"
+	EnvRabbitmqQueueName = "RABBITMQ_QUEUE_NAME"
 
 	DefaultLoggerLevel = "DEBUG"
 )

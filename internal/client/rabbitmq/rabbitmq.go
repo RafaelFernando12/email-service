@@ -68,7 +68,7 @@ func (c *rabbitMQClient) Consume(queueName string) (<-chan amqp.Delivery, error)
 	messages, err := channel.Consume(
 		queueName,
 		"",
-		true,
+		false,
 		false,
 		false,
 		false,

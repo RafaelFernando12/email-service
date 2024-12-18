@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"email-service/domain/email"
 	"email-service/internal/client/rabbitmq"
 	"email-service/internal/http"
@@ -22,6 +23,11 @@ func main() {
 		env.EnvRabbitmqPort,
 		env.EnvRabbitmqUser,
 		env.EnvRabbitmqPassword,
+		env.EnvRabbitmqQueueName,
+		env.EnvSmtpHost,
+		env.EnvSmtpPort,
+		env.EnvSmtpUser,
+		env.EnvSmtpPassword,
 	)
 
 	if err != nil {
@@ -30,9 +36,14 @@ func main() {
 		return
 	}
 
-	client := rabbitmq.NewRabbitMQClient(env.GetEnv(env.EnvRabbitmqServer), env.GetEnv(env.EnvRabbitmqPort), env.GetEnv(env.EnvRabbitmqUser), env.GetEnv(env.EnvRabbitmqPassword))
+	client := rabbitmq.NewRabbitMQClient(
+		env.GetEnv(env.EnvRabbitmqServer),
+		env.GetEnv(env.EnvRabbitmqPort),
+		env.GetEnv(env.EnvRabbitmqUser),
+		env.GetEnv(env.EnvRabbitmqPassword))
 
-	email.NewEmailService(client)
+	emailService := email.NewEmailService(client, env.GetEnv(env.EnvSmtpHost), env.GetEnv(env.EnvSmtpPort), env.GetEnv(env.EnvSmtpUser), env.GetEnv(env.EnvSmtpPassword))
+	go emailService.StartListener(context.TODO(), env.GetEnv(env.EnvRabbitmqQueueName))
 
 	server := http.NewServer(env.GetEnv(env.EnvPort, env.DefaultPort), nil, logger)
 	server.Start()
